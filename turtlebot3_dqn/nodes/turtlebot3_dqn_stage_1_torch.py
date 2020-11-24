@@ -60,6 +60,7 @@ class ReinforceAgent():
         self.state_size = state_size
         self.action_size = action_size
         self.episode_step = 10000
+        self.update_freq = 1
         self.target_update = 2000
         self.target_update_freq = 5000
         self.discount_factor = 0.99
@@ -67,9 +68,9 @@ class ReinforceAgent():
         self.epsilon = 1.0
         self.max_epsilon = 1.0   
         self.min_epsilon = 0.1
-        self.epsilon_decay_step = (self.max_epsilon - self.min_epsilon)/1000000
+        self.epsilon_decay_step = (self.max_epsilon - self.min_epsilon)/100000
         self.batch_size = 64
-        self.train_start = 10000
+        self.train_start = 5000
         self.memory = deque(maxlen=1000000)
 
         # if gpu is to be used
@@ -98,7 +99,7 @@ class ReinforceAgent():
         #         self.epsilon = param.get('epsilon')
 
         # saving model and data
-        self.save_model_freq = 20
+        self.save_model_freq = 100
         
 
     def updateTargetModel(self):
@@ -221,10 +222,12 @@ if __name__ == '__main__':
 
             ## check if replay buffer is ready:
             if len(agent.memory) >= agent.train_start:
-                agent.trainModel()
+                # learn only after every 8 steps:
+                if global_step % agent.update_freq == 0:
+                    agent.trainModel()
 
             ## update the target network parameters
-            if global_step <= agent.target_update_freq:
+            if global_step % agent.target_update_freq == 0:
                 # update the target network
                 agent.updateTargetModel()
 
