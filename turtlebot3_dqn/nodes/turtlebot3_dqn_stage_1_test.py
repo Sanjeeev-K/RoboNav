@@ -46,7 +46,7 @@ log_dir = 'logs/' + current_time
 tensorboard = SummaryWriter(log_dir=log_dir)
 
 
-EPISODES = 3000
+EPISODES = 10
 
 class ReinforceAgent():
     def __init__(self, state_size, action_size):
@@ -84,27 +84,27 @@ class ReinforceAgent():
                             set_init=self.set_weight_init).to(self.device)
 
         # update the target model
-        self.updateTargetModel()
+        # self.updateTargetModel()
 
         # define loss function and optimizer
         self.loss_fcn = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(),
                                 lr=self.learning_rate)
 
-        # if self.load_model:
-        #     self.model.set_weights(load_model(self.dirPath+str(self.load_episode)+".h5").get_weights())
 
-        #     with open(self.dirPath+str(self.load_episode)+'.json') as outfile:
-        #         param = json.load(outfile)
-        #         self.epsilon = param.get('epsilon')
+        print('loading trained model')
+        model_params = torch.load(self.dirPath + '300.pth')
+        # upload model file
+    #    model_params = torch.load("./Project3/models/DQN_model.pth")
+    #    model_params = torch.load(model_path + args.model)
+        # model_params = torch.load('model/dqn_main.pth')
 
-        # saving model and data
-        self.save_model_freq = 20
+        # store to network
+        self.model.load_state_dict(model_params)
+
+        # # saving model and data
+        # self.save_model_freq = 100
         
-
-    def updateTargetModel(self):
-        self.target_model.load_state_dict(self.model.state_dict())
-
 
     def getAction(self, state):
         # process state
@@ -113,72 +113,16 @@ class ReinforceAgent():
         # obtain q_value from q_net
         self.q_value = self.model(state_t)
 
-        # use epsilon-greedy if test is false
-        if np.random.rand() < self.epsilon:
-            action = random.randrange(self.action_size)
-
-        else:
-            # find greedy action
-            action = int(torch.argmax(self.q_value))
+        # find greedy action
+        action = int(torch.argmax(self.q_value))
         
         return action
 
 
-    def appendMemory(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-
-
-    def replayBuffer(self):
-         # sample from the replay buffer
-        states, actions, rewards, next_states, dones = \
-                    zip(*random.sample(self.memory, self.batch_size))
-
-        return states, actions, rewards, next_states, dones
-
-
-    def trainModel(self):
-        # update epsilon value: causing it to decay
-        if self.epsilon > self.min_epsilon:
-            self.epsilon -= self.epsilon_decay_step
-
-        ## sample random minibatch from buffer
-        states, actions, rewards, next_states, done = self.replayBuffer()
-
-        ## process parameters
-        states_t = torch.Tensor(np.array(states)).to(self.device)
-        actions_t = torch.Tensor(actions).to(self.device)
-        actions_t = actions_t.type(torch.int64).unsqueeze(-1)
-        next_states_t = torch.Tensor(np.array(next_states)).to(self.device)
-
-        ## get max Q value for state->next_state using q_target_net
-        max_q_values = torch.max(self.target_model(next_states_t), dim=1)[0]
-
-        ## check if the episode terminates in next step
-        td_target = np.zeros(self.batch_size)
-        for i in range(self.batch_size):
-            if done[i]:
-                td_target[i] = rewards[i]
-            else:
-                td_target[i] = rewards[i] + self.discount_factor*max_q_values[i]
-
-        ## convert td_target to tensor
-        td_target_t = torch.Tensor(td_target).to(self.device)
-
-        ## get current_q_values
-        curr_q_values = self.model(states_t).gather(1, actions_t).squeeze()
-
-        ## calculate the loss 
-        self.loss = self.loss_fcn(curr_q_values, td_target_t)
-
-        ## perform backprop and update weights
-        self.optimizer.zero_grad()
-        self.loss.backward()
-        self.optimizer.step()
-
 
 if __name__ == '__main__':
     # initialize node
-    rospy.init_node('turtlebot3_dqn_stage_1')
+    rospy.init_node('turtlebot3_dqn_stage_1_test')
     # initialize result publisher
     pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
     # initialize get_action publisher
@@ -217,19 +161,19 @@ if __name__ == '__main__':
             # take action and return state, reward, status
             next_state, reward, done = env.step(action)
 
-            # append memory to memory buffer
-            agent.appendMemory(state, action, reward, next_state, done)
+            # # append memory to memory buffer
+            # agent.appendMemory(state, action, reward, next_state, done)
 
-            ## check if replay buffer is ready:
-            if len(agent.memory) >= agent.train_start:
-                # learn only after every 8 steps:
-                if global_step % agent.update_freq == 0:
-                    agent.trainModel()
+            # ## check if replay buffer is ready:
+            # if len(agent.memory) >= agent.train_start:
+            #     # learn only after every 8 steps:
+            #     if global_step % agent.update_freq == 0:
+            #         agent.trainModel()
 
-            ## update the target network parameters
-            if global_step % agent.target_update_freq == 0:
-                # update the target network
-                agent.updateTargetModel()
+            # ## update the target network parameters
+            # if global_step % agent.target_update_freq == 0:
+            #     # update the target network
+            #     agent.updateTargetModel()
 
             # increment score and append reward
             score += reward
@@ -248,9 +192,9 @@ if __name__ == '__main__':
             tensorboard.add_scalar('average step reward (over 30 steps)', 
                                     sum(total_reward[-num:])/num, global_step)
 
-            # save model after every N episodes
-            if e % agent.save_model_freq == 0 and e != 0:
-                torch.save(agent.model.state_dict(), agent.dirPath + str(e) + '.pth')
+            # # save model after every N episodes
+            # if e % agent.save_model_freq == 0 and e != 0:
+            #     torch.save(agent.model.state_dict(), agent.dirPath + str(e) + '.pth')
 
             # timeout after 1200 steps (robot is just moving in circles or so)
             if t >= 1200: # changed this from 500 to 1200 steps

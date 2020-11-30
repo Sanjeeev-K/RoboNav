@@ -26,6 +26,9 @@ from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+import sys
+sys.path.append('/home/kenembanisi/robotis_ml_ws/src/turtlebot3_machine_learning/turtlebot3_dqn/src/turtlebot3_dqn/')
 from respawnGoal import Respawn
 
 class Env():
@@ -69,7 +72,7 @@ class Env():
     def getState(self, scan):
         scan_range = []
         heading = self.heading
-        min_range = 0.13
+        min_range = 0.13 
         done = False
 
         for i in range(len(scan.ranges)):
@@ -103,6 +106,10 @@ class Env():
 
         distance_rate = 2 ** (current_distance / self.goal_distance)
         reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate)
+        
+        ###
+        # rospy.loginfo("------ Reward is: ["+str(reward)+"] ----------------")
+        ###
 
         if done:
             rospy.loginfo("Collision!!")

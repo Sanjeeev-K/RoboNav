@@ -28,7 +28,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from collections import deque
 from std_msgs.msg import Float32MultiArray
-from src.turtlebot3_dqn.environment_stage_1_torch import Env
+from src.turtlebot3_dqn.environment_stage_2_torch import Env
 from src.turtlebot3_dqn.dqn_model import DQN
 import torch
 import torch.nn.functional as F
@@ -46,15 +46,16 @@ log_dir = 'logs/' + current_time
 tensorboard = SummaryWriter(log_dir=log_dir)
 
 
+
 EPISODES = 3000
 
 class ReinforceAgent():
     def __init__(self, state_size, action_size):
         self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
         self.dirPath = os.path.dirname(os.path.realpath(__file__))
-        self.dirPath = self.dirPath.replace('turtlebot3_dqn/nodes', 'turtlebot3_dqn/save_model/stage_1_')
+        self.dirPath = self.dirPath.replace('turtlebot3_dqn/nodes', 'turtlebot3_dqn/save_model/stage_2_')
         self.result = Float32MultiArray()
-
+        
         self.load_model = False
         self.load_episode = 0
         self.state_size = state_size
@@ -91,16 +92,9 @@ class ReinforceAgent():
         self.optimizer = torch.optim.Adam(self.model.parameters(),
                                 lr=self.learning_rate)
 
-        # if self.load_model:
-        #     self.model.set_weights(load_model(self.dirPath+str(self.load_episode)+".h5").get_weights())
-
-        #     with open(self.dirPath+str(self.load_episode)+'.json') as outfile:
-        #         param = json.load(outfile)
-        #         self.epsilon = param.get('epsilon')
-
         # saving model and data
         self.save_model_freq = 20
-        
+
 
     def updateTargetModel(self):
         self.target_model.load_state_dict(self.model.state_dict())
@@ -136,7 +130,7 @@ class ReinforceAgent():
         return states, actions, rewards, next_states, dones
 
 
-    def trainModel(self):
+    def trainModel(self, target=False):
         # update epsilon value: causing it to decay
         if self.epsilon > self.min_epsilon:
             self.epsilon -= self.epsilon_decay_step
@@ -176,9 +170,10 @@ class ReinforceAgent():
         self.optimizer.step()
 
 
+
 if __name__ == '__main__':
     # initialize node
-    rospy.init_node('turtlebot3_dqn_stage_1')
+    rospy.init_node('turtlebot3_dqn_stage_2')
     # initialize result publisher
     pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
     # initialize get_action publisher
@@ -188,7 +183,7 @@ if __name__ == '__main__':
     get_action = Float32MultiArray()
 
     # set state and action space sizes
-    state_size = 26
+    state_size = 28
     action_size = 5
 
     # initialize environment
@@ -280,5 +275,3 @@ if __name__ == '__main__':
                 break
 
             global_step += 1
-            # if global_step % agent.target_update == 0:
-            #     rospy.loginfo("UPDATE TARGET NETWORK")
