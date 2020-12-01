@@ -34,6 +34,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from src.turtlebot3_dqn.agent import ReinforceAgent
 
 # set the random seed:
 torch.manual_seed(1000)
@@ -48,135 +49,135 @@ tensorboard = SummaryWriter(log_dir=log_dir)
 
 EPISODES = 3000
 
-class ReinforceAgent():
-    def __init__(self, state_size, action_size):
-        self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
-        self.dirPath = os.path.dirname(os.path.realpath(__file__))
-        self.dirPath = self.dirPath.replace('turtlebot3_dqn/nodes', 'turtlebot3_dqn/save_model/stage_1_')
-        self.result = Float32MultiArray()
+# class ReinforceAgent():
+#     def __init__(self, state_size, action_size):
+#         self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
+#         self.dirPath = os.path.dirname(os.path.realpath(__file__))
+#         self.dirPath = self.dirPath.replace('turtlebot3_dqn/nodes', 'turtlebot3_dqn/save_model/stage_1_')
+#         self.result = Float32MultiArray()
 
-        self.load_model = False
-        self.load_episode = 0
-        self.state_size = state_size
-        self.action_size = action_size
-        self.episode_step = 10000
-        self.update_freq = 1
-        self.target_update = 2000
-        self.target_update_freq = 5000
-        self.discount_factor = 0.99
-        self.learning_rate = 0.00025
-        self.epsilon = 1.0
-        self.max_epsilon = 1.0   
-        self.min_epsilon = 0.1
-        self.epsilon_decay_step = (self.max_epsilon - self.min_epsilon)/100000
-        self.batch_size = 64
-        self.train_start = 5000
-        self.memory = deque(maxlen=1000000)
+#         self.load_model = False
+#         self.load_episode = 0
+#         self.state_size = state_size
+#         self.action_size = action_size
+#         self.episode_step = 10000
+#         self.update_freq = 1
+#         self.target_update = 2000
+#         self.target_update_freq = 5000
+#         self.discount_factor = 0.99
+#         self.learning_rate = 0.00025
+#         self.epsilon = 1.0
+#         self.max_epsilon = 1.0   
+#         self.min_epsilon = 0.1
+#         self.epsilon_decay_step = (self.max_epsilon - self.min_epsilon)/100000
+#         self.batch_size = 64
+#         self.train_start = 5000
+#         self.memory = deque(maxlen=1000000)
 
-        # if gpu is to be used
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#         # if gpu is to be used
+#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # initialize Q network and target Q network
-        self.set_weight_init = True
-        self.model =  DQN(self.state_size, self.action_size, 
-                            set_init=self.set_weight_init).to(self.device)
-        self.target_model = DQN(self.state_size, self.action_size, 
-                            set_init=self.set_weight_init).to(self.device)
+#         # initialize Q network and target Q network
+#         self.set_weight_init = True
+#         self.model =  DQN(self.state_size, self.action_size, 
+#                             set_init=self.set_weight_init).to(self.device)
+#         self.target_model = DQN(self.state_size, self.action_size, 
+#                             set_init=self.set_weight_init).to(self.device)
 
-        # update the target model
-        self.updateTargetModel()
+#         # update the target model
+#         self.updateTargetModel()
 
-        # define loss function and optimizer
-        self.loss_fcn = torch.nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(),
-                                lr=self.learning_rate)
+#         # define loss function and optimizer
+#         self.loss_fcn = torch.nn.MSELoss()
+#         self.optimizer = torch.optim.Adam(self.model.parameters(),
+#                                 lr=self.learning_rate)
 
-        # if self.load_model:
-        #     self.model.set_weights(load_model(self.dirPath+str(self.load_episode)+".h5").get_weights())
+#         # if self.load_model:
+#         #     self.model.set_weights(load_model(self.dirPath+str(self.load_episode)+".h5").get_weights())
 
-        #     with open(self.dirPath+str(self.load_episode)+'.json') as outfile:
-        #         param = json.load(outfile)
-        #         self.epsilon = param.get('epsilon')
+#         #     with open(self.dirPath+str(self.load_episode)+'.json') as outfile:
+#         #         param = json.load(outfile)
+#         #         self.epsilon = param.get('epsilon')
 
-        # saving model and data
-        self.save_model_freq = 20
+#         # saving model and data
+#         self.save_model_freq = 20
         
 
-    def updateTargetModel(self):
-        self.target_model.load_state_dict(self.model.state_dict())
+#     def updateTargetModel(self):
+#         self.target_model.load_state_dict(self.model.state_dict())
 
 
-    def getAction(self, state):
-        # process state
-        state_t = torch.Tensor(np.array(state)).to(self.device).unsqueeze(0)
+#     def getAction(self, state):
+#         # process state
+#         state_t = torch.Tensor(np.array(state)).to(self.device).unsqueeze(0)
 
-        # obtain q_value from q_net
-        self.q_value = self.model(state_t)
+#         # obtain q_value from q_net
+#         self.q_value = self.model(state_t)
 
-        # use epsilon-greedy if test is false
-        if np.random.rand() < self.epsilon:
-            action = random.randrange(self.action_size)
+#         # use epsilon-greedy if test is false
+#         if np.random.rand() < self.epsilon:
+#             action = random.randrange(self.action_size)
 
-        else:
-            # find greedy action
-            action = int(torch.argmax(self.q_value))
+#         else:
+#             # find greedy action
+#             action = int(torch.argmax(self.q_value))
         
-        return action
+#         return action
 
 
-    def appendMemory(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+#     def appendMemory(self, state, action, reward, next_state, done):
+#         self.memory.append((state, action, reward, next_state, done))
 
 
-    def replayBuffer(self):
-         # sample from the replay buffer
-        states, actions, rewards, next_states, dones = \
-                    zip(*random.sample(self.memory, self.batch_size))
+#     def replayBuffer(self):
+#          # sample from the replay buffer
+#         states, actions, rewards, next_states, dones = \
+#                     zip(*random.sample(self.memory, self.batch_size))
 
-        return states, actions, rewards, next_states, dones
-
-
-    def trainModel(self):
-        # update epsilon value: causing it to decay
-        if self.epsilon > self.min_epsilon:
-            self.epsilon -= self.epsilon_decay_step
-
-        ## sample random minibatch from buffer
-        states, actions, rewards, next_states, done = self.replayBuffer()
-
-        ## process parameters
-        states_t = torch.Tensor(np.array(states)).to(self.device)
-        actions_t = torch.Tensor(actions).to(self.device)
-        actions_t = actions_t.type(torch.int64).unsqueeze(-1)
-        next_states_t = torch.Tensor(np.array(next_states)).to(self.device)
-
-        ## get max Q value for state->next_state using q_target_net
-        max_q_values = torch.max(self.target_model(next_states_t), dim=1)[0]
-
-        ## check if the episode terminates in next step
-        td_target = np.zeros(self.batch_size)
-        for i in range(self.batch_size):
-            if done[i]:
-                td_target[i] = rewards[i]
-            else:
-                td_target[i] = rewards[i] + self.discount_factor*max_q_values[i]
-
-        ## convert td_target to tensor
-        td_target_t = torch.Tensor(td_target).to(self.device)
-
-        ## get current_q_values
-        curr_q_values = self.model(states_t).gather(1, actions_t).squeeze()
-
-        ## calculate the loss 
-        self.loss = self.loss_fcn(curr_q_values, td_target_t)
-
-        ## perform backprop and update weights
-        self.optimizer.zero_grad()
-        self.loss.backward()
-        self.optimizer.step()
+#         return states, actions, rewards, next_states, dones
 
 
-if __name__ == '__main__':
+#     def trainModel(self):
+#         # update epsilon value: causing it to decay
+#         if self.epsilon > self.min_epsilon:
+#             self.epsilon -= self.epsilon_decay_step
+
+#         ## sample random minibatch from buffer
+#         states, actions, rewards, next_states, done = self.replayBuffer()
+
+#         ## process parameters
+#         states_t = torch.Tensor(np.array(states)).to(self.device)
+#         actions_t = torch.Tensor(actions).to(self.device)
+#         actions_t = actions_t.type(torch.int64).unsqueeze(-1)
+#         next_states_t = torch.Tensor(np.array(next_states)).to(self.device)
+
+#         ## get max Q value for state->next_state using q_target_net
+#         max_q_values = torch.max(self.target_model(next_states_t), dim=1)[0]
+
+#         ## check if the episode terminates in next step
+#         td_target = np.zeros(self.batch_size)
+#         for i in range(self.batch_size):
+#             if done[i]:
+#                 td_target[i] = rewards[i]
+#             else:
+#                 td_target[i] = rewards[i] + self.discount_factor*max_q_values[i]
+
+#         ## convert td_target to tensor
+#         td_target_t = torch.Tensor(td_target).to(self.device)
+
+#         ## get current_q_values
+#         curr_q_values = self.model(states_t).gather(1, actions_t).squeeze()
+
+#         ## calculate the loss 
+#         self.loss = self.loss_fcn(curr_q_values, td_target_t)
+
+#         ## perform backprop and update weights
+#         self.optimizer.zero_grad()
+#         self.loss.backward()
+#         self.optimizer.step()
+
+
+def main():
     # initialize node
     rospy.init_node('turtlebot3_dqn_stage_1')
     # initialize result publisher
@@ -282,3 +283,7 @@ if __name__ == '__main__':
             global_step += 1
             # if global_step % agent.target_update == 0:
             #     rospy.loginfo("UPDATE TARGET NETWORK")
+
+
+if __name__ == '__main__':
+    main()
