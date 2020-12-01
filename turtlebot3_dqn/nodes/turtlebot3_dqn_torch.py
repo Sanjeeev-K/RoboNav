@@ -82,6 +82,13 @@ def train(args):
     # set start time
     start_time = time.time()
 
+    # set file storage parameters
+    st_time = datetime.datetime.now().strftime("%d-%m-[%H:%M]")
+    save_count = 0
+    logs_path = 'logs/'
+    logs_dir = logs_path + method + '_model_' + st_time 
+    os.makedirs(logs_dir)
+
     EPISODES = 3000
 
     # main loop: for each episode
@@ -158,6 +165,13 @@ def train(args):
                 tensorboard.add_scalar('episode reward', score, e)
                 tensorboard.add_scalar('average episode reward (over 10 episodes)', 
                                     sum(scores[-k:])/k, e)
+
+                # save reward to file
+                reward_logs_filename = logs_dir + '/' + method + '-rewards.npy'
+
+                np.save(reward_logs_filename, np.array(total_reward, dtype=np.float))
+                np.save(reward_logs_filename, np.array(scores, dtype=np.float))
+
                 break
 
             global_step += 1
