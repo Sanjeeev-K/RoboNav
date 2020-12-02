@@ -1,4 +1,4 @@
-1. The script folder contains costmap2image.py files
+1. The script folder contains costmap2image.py files  
 
 
 2. Move the launch folder's files to turtlebot3_gazebo/launch
