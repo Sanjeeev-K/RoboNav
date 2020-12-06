@@ -26,10 +26,11 @@ from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-
 import sys
-sys.path.append('/home/kenembanisi/robotis_ml_ws/src/turtlebot3_machine_learning/turtlebot3_dqn/src/turtlebot3_dqn/')
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from respawnGoal import Respawn
+
 
 class Env():
     def __init__(self, action_size):
@@ -39,6 +40,7 @@ class Env():
         self.action_size = action_size
         self.initGoal = True
         self.get_goalbox = False
+        self.goal_reached = False
         self.position = Pose()
         self.pub_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=5)
         self.sub_odom = rospy.Subscriber('odom', Odometry, self.getOdometry)
@@ -46,6 +48,10 @@ class Env():
         self.unpause_proxy = rospy.ServiceProxy('gazebo/unpause_physics', Empty)
         self.pause_proxy = rospy.ServiceProxy('gazebo/pause_physics', Empty)
         self.respawn_goal = Respawn()
+
+        # get ros_parameters
+        self.stage = rospy.get_param('stage_number')
+        self.reward = rospy.get_param('reward')
 
     def getGoalDistace(self):
         goal_distance = round(math.hypot(self.goal_x - self.position.x, self.goal_y - self.position.y), 2)
@@ -72,7 +78,7 @@ class Env():
     def getState(self, scan):
         scan_range = []
         heading = self.heading
-        min_range = 0.15 # changed from 0.13 to 0.15
+        min_range = 0.13
         done = False
 
         for i in range(len(scan.ranges)):
@@ -83,19 +89,30 @@ class Env():
             else:
                 scan_range.append(scan.ranges[i])
 
+        obstacle_min_range = round(min(scan_range), 2)
+        obstacle_angle = np.argmin(scan_range)
         if min_range > min(scan_range) > 0:
             done = True
 
         current_distance = round(math.hypot(self.goal_x - self.position.x, self.goal_y - self.position.y),2)
         if current_distance < 0.2:
             self.get_goalbox = True
+            self.goal_reached = True
 
-        return scan_range + [heading, current_distance], done
+        if self.stage == 1:
+            return scan_range + [heading, current_distance], done
+        else:
+            return scan_range + [heading, current_distance, obstacle_min_range, obstacle_angle], done
 
     def setReward(self, state, done, action):
         yaw_reward = []
-        current_distance = state[-1]
-        heading = state[-2]
+        if self.stage == 1:
+            current_distance = state[-1]
+            heading = state[-2]
+        else:
+            obstacle_min_range = state[-2]
+            current_distance = state[-3]
+            heading = state[-4]
 
         for i in range(5):
             angle = -pi / 4 + heading + (pi / 8 * i) + pi / 2
@@ -103,19 +120,32 @@ class Env():
             yaw_reward.append(tr)
 
         distance_rate = 2 ** (current_distance / self.goal_distance)
-        reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate)
-        ###
-        # rospy.loginfo("------ Reward is: ["+str(reward)+"] ----------------")
-        ###
+
+        if self.stage == 4:
+            if obstacle_min_range < 0.5:
+                ob_reward = -5
+            else:
+                ob_reward = 0
+            reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate) + ob_reward
+        else:
+            reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate)
 
         if done:
             rospy.loginfo("Collision!!")
-            reward = -200
+            if self.stage == 1:
+                reward = -200
+            elif self.stage == 4:
+                reward = -500
+            else:
+                reward = -150
             self.pub_cmd_vel.publish(Twist())
 
         if self.get_goalbox:
             rospy.loginfo("Goal!!")
-            reward = 200
+            if self.stage == 4:
+                reward = 1000
+            else:
+                reward = 200
             self.pub_cmd_vel.publish(Twist())
             self.goal_x, self.goal_y = self.respawn_goal.getPosition(True, delete=True)
             self.goal_distance = self.getGoalDistace()

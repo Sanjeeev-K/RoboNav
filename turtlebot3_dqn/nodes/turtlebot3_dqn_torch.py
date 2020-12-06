@@ -34,6 +34,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from src.turtlebot3_dqn.agent import ReinforceAgent
+from src.turtlebot3_dqn.data_logger import DataLogger
+from src.turtlebot3_dqn.environment import Env
 
 # set the random seed:
 torch.manual_seed(1000)
@@ -52,6 +54,8 @@ def train(args):
     stage = args[1]
     method = args[2]
     mode = args[3]
+    # set the mode ros_parameter:
+    rospy.set_param('mode', mode)
     # initialize node
     rospy.init_node('turtlebot3_dqn_stage_'+str(stage))
     # initialize result publisher
@@ -183,6 +187,8 @@ def test(args):
     stage = args[1]
     method = args[2]
     mode = args[3]
+    # set the mode ros_parameter:
+    rospy.set_param('mode', mode)
     # initialize node
     rospy.init_node('turtlebot3_dqn_stage_'+str(stage))
     # initialize result publisher
@@ -192,6 +198,8 @@ def test(args):
     # set varaibles
     result = Float32MultiArray()
     get_action = Float32MultiArray()
+    # initialize data logger
+    logger = DataLogger(args)
 
     # set state and action space sizes
     if stage == '1':
@@ -215,16 +223,24 @@ def test(args):
     # set start time
     start_time = time.time()
 
-    EPISODES = 10
+    EPISODES = 30
 
     # main loop: for each episode
-    for e in range(agent.load_episode + 1, EPISODES):
+    for e in range(agent.load_episode + 1, EPISODES):        
+        # set the trial and goal_count as a ros_parameter
+        rospy.set_param('trial_number', e-1)
+        goal_count = 0
+        rospy.set_param('goal_count', goal_count)
+
         done = False
         state = env.reset()
         score = 0
         
         # inner loop: for each episode step
-        for t in range(agent.episode_step):
+        # for t in range(agent.episode_step):
+        episode_done = False
+        goal_count = 0
+        while not episode_done:
             # get action
             action = agent.getAction(state)
 
@@ -242,12 +258,22 @@ def test(args):
             get_action.data = [action, score, reward]
             pub_get_action.publish(get_action)
 
-            # timeout after 1200 steps (robot is just moving in circles or so)
-            if t >= 1200: # changed this from 500 to 1200 steps
-                rospy.loginfo("Time out!!")
-                done = True
+            # store states
+            logger.store_data()
+
+            # check if goal is reached
+            if env.goal_reached:
+                goal_count += 1
+                rospy.set_param('goal_count', goal_count)
+                rospy.loginfo('Trial: %d | Goal [%d] completed', e, goal_count)
+                env.goal_reached = False
+                if goal_count == 5:
+                    episode_done = True
+                    logger.save_data(e)
 
             if done:
+                # if episode/trial fails (i.e. collides)
+                logger.save_data(e, done='fail')
                 result.data = [score, int(torch.argmax(agent.q_value))]
                 pub_result.publish(result)
                 agent.updateTargetModel()
@@ -272,31 +298,8 @@ if __name__ == '__main__':
     # get argument passed to node
     args = rospy.myargv(argv=sys.argv)
     
-    # get stage argument:
+    # get mode argument:
     mode = args[3]
-    reward_type = args[4]
-    stage = args[1]
-
-    if stage == "1":
-        if reward_type == "1":
-            from src.turtlebot3_dqn.environment_stage_1_torch_r1 import Env
-        elif reward_type == "2":
-            from src.turtlebot3_dqn.environment_stage_1_torch_r2 import Env
-    elif stage == "2":
-        if reward_type == "1":
-            from src.turtlebot3_dqn.environment_stage_2_torch_r1 import Env
-        elif reward_type == "2":
-            from src.turtlebot3_dqn.environment_stage_2_torch_r2 import Env
-    elif stage == "3":
-        if reward_type == "1":
-            from src.turtlebot3_dqn.environment_stage_3_torch_r1 import Env
-        elif reward_type == "2":
-            from src.turtlebot3_dqn.environment_stage_3_torch_r2 import Env
-    elif stage == "4":
-        if reward_type == "1":
-            from src.turtlebot3_dqn.environment_stage_4_torch_r1 import Env
-        elif reward_type == "2":
-            from src.turtlebot3_dqn.environment_stage_4_torch_r2 import Env
 
     # run the appropriate mode
     if mode == "train":

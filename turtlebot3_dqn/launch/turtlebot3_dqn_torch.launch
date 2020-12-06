@@ -25,6 +25,8 @@
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model turtlebot3_burger -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" /> -->
 
   <param name="stage_number"  value="$(arg stage)"/>
+  <param name="reward"  value="$(arg reward)"/>
+
   <node pkg="turtlebot3_dqn" type="turtlebot3_dqn_torch.py" name="turtlebot3_dqn" output="screen"
         args="$(arg stage) $(arg method) $(arg mode) $(arg reward)"/>
 

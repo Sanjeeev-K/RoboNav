@@ -82,44 +82,80 @@ class Respawn():
         if delete:
             self.deleteModel()
 
+        
+        # get mode parameter
+        mode = rospy.get_param('mode')
+
         if self.stage != 4:
-            while position_check:
-                goal_x = random.randrange(-12, 13) / 10.0
-                goal_y = random.randrange(-12, 13) / 10.0
-                if abs(goal_x - self.obstacle_1[0]) <= 0.4 and abs(goal_y - self.obstacle_1[1]) <= 0.4:
-                    position_check = True
-                elif abs(goal_x - self.obstacle_2[0]) <= 0.4 and abs(goal_y - self.obstacle_2[1]) <= 0.4:
-                    position_check = True
-                elif abs(goal_x - self.obstacle_3[0]) <= 0.4 and abs(goal_y - self.obstacle_3[1]) <= 0.4:
-                    position_check = True
-                elif abs(goal_x - self.obstacle_4[0]) <= 0.4 and abs(goal_y - self.obstacle_4[1]) <= 0.4:
-                    position_check = True
-                elif abs(goal_x - 0.0) <= 0.4 and abs(goal_y - 0.0) <= 0.4:
-                    position_check = True
-                else:
-                    position_check = False
+            if mode == 'train':
+                while position_check:
+                    goal_x = random.randrange(-12, 13) / 10.0
+                    goal_y = random.randrange(-12, 13) / 10.0
+                    if abs(goal_x - self.obstacle_1[0]) <= 0.4 and abs(goal_y - self.obstacle_1[1]) <= 0.4:
+                        position_check = True
+                    elif abs(goal_x - self.obstacle_2[0]) <= 0.4 and abs(goal_y - self.obstacle_2[1]) <= 0.4:
+                        position_check = True
+                    elif abs(goal_x - self.obstacle_3[0]) <= 0.4 and abs(goal_y - self.obstacle_3[1]) <= 0.4:
+                        position_check = True
+                    elif abs(goal_x - self.obstacle_4[0]) <= 0.4 and abs(goal_y - self.obstacle_4[1]) <= 0.4:
+                        position_check = True
+                    elif abs(goal_x - 0.0) <= 0.4 and abs(goal_y - 0.0) <= 0.4:
+                        position_check = True
+                    else:
+                        position_check = False
 
-                if abs(goal_x - self.last_goal_x) < 1 and abs(goal_y - self.last_goal_y) < 1:
-                    position_check = True
+                    if abs(goal_x - self.last_goal_x) < 1 and abs(goal_y - self.last_goal_y) < 1:
+                        position_check = True
 
-                self.goal_position.position.x = goal_x
-                self.goal_position.position.y = goal_y
+                    self.goal_position.position.x = goal_x
+                    self.goal_position.position.y = goal_y
+                    
+            if mode == 'test':
+                trial = rospy.get_param('trial_number')
+                goal_count = rospy.get_param('goal_count')
+
+                trial_goals = [[[0.6, 0.0], [0.9, 1.2], [-0.9, 0.0], [-0.1, -0.1], [0.5, 0.1]],
+                                [[0.9, 1.2], [-1.1, 0.9], [0.9, 1.2], [1.1, 0.3], [0.1, 1.0]],
+                                [[-0.6, -1.2], [1.2, 0.5], [1.2, -0.6], [-0.1, -1.2], [1.2, 1.2]],
+                                [[-0.5, -0.1], [-1.2, -1.1], [-0.1, -0.8], [0.8, 1.1], [-0.3, 1.2]],
+                                [[1.2, 1.0], [-0.6, 0.0], [1.2, -1.0], [-0.2, -1.2], [0.1, 0.7]],
+                                [[-1.1, -0.7], [-0.9, 1.1], [-0.8, 1.2], [-1.2, -0.3], [1.1, -0.1]],
+                                [[1.2, 0.7], [-1.2, -0.5], [1.2, -0.8], [-1.2, 0.8], [1.1, 0.7]],
+                                [[-1.1, 0.9], [0.0, -1.0], [-1.2, 0.1], [-0.5, -1.2], [0.6, 1.1]],
+                                [[-1.1, 0.5], [1.1, 1.0], [1.0, 0.0], [-0.9, 1.2], [0.0, -0.7]],
+                                [[-0.1, 1.1], [1.1, 0.3], [-0.8, 1.2], [-1.2, -0.3], [0.0, 0.9]]]
+
+                self.goal_position.position.x = trial_goals[trial][goal_count][0]
+                self.goal_position.position.y = trial_goals[trial][goal_count][1]
 
         else:
-            while position_check:
+            if mode == 'train':
+                while position_check:
+                    goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
+                    goal_y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
+
+                    self.index = random.randrange(0, 13)
+                    print(self.index, self.last_index)
+                    if self.last_index == self.index:
+                        position_check = True
+                    else:
+                        self.last_index = self.index
+                        position_check = False
+
+                    self.goal_position.position.x = goal_x_list[self.index]
+                    self.goal_position.position.y = goal_y_list[self.index]
+            
+            if mode == 'test':
+                trial = rospy.get_param('trial_number')
+                goal_count = rospy.get_param('goal_count')
+
                 goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
                 goal_y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
 
-                self.index = random.randrange(0, 13)
-                print(self.index, self.last_index)
-                if self.last_index == self.index:
-                    position_check = True
-                else:
-                    self.last_index = self.index
-                    position_check = False
+                self.trial_index = []
 
-                self.goal_position.position.x = goal_x_list[self.index]
-                self.goal_position.position.y = goal_y_list[self.index]
+                self.goal_position.position.x = goal_x_list[self.trial_index]
+                self.goal_position.position.y = goal_y_list[self.trial_index]
 
         time.sleep(0.5)
         self.respawnModel()

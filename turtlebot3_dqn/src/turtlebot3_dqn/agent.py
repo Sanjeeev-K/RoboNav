@@ -40,10 +40,11 @@ random.seed(1000)
 
 class ReinforceAgent():
     def __init__(self, state_size, action_size, stage, method, mode):
+        self.stage = stage
         self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
         self.dirPath = os.path.dirname(os.path.realpath(__file__))
         self.dirPath = self.dirPath.replace('src/turtlebot3_dqn', 
-                                    'save_model/stage_'+stage+'_')
+                                    'save_model/stage_'+self.stage+'_')
         self.result = Float32MultiArray()
 
         self.load_model = False
@@ -71,7 +72,7 @@ class ReinforceAgent():
         # initialize Q network and target Q network
         self.set_weight_init = True
         if method == "dqn":
-            self.model =  DuelingDQN(self.state_size, self.action_size, 
+            self.model =  DQN(self.state_size, self.action_size, 
                                 set_init=self.set_weight_init).to(self.device)
             self.target_model = DQN(self.state_size, self.action_size, 
                                 set_init=self.set_weight_init).to(self.device)
@@ -81,8 +82,6 @@ class ReinforceAgent():
             self.target_model = DuelingDQN(self.state_size, self.action_size, 
                                 set_init=self.set_weight_init).to(self.device)
 
-        # update the target model
-        self.updateTargetModel()
 
         # define loss function and optimizer
         self.loss_fcn = torch.nn.MSELoss()
@@ -93,10 +92,23 @@ class ReinforceAgent():
             self.load_model = True
         
         if self.load_model:
-            print('loading trained model in: '+ self.dirPath + 'final.pth')
-            model_params = torch.load(self.dirPath + 'final.pth')
+            if self.stage == '1':
+                model_name = 'final_dqn_11-24.pth'
+            if self.stage == '2':
+                model_name = 'final_dqn_11-24.pth'
+            if self.stage == '3':
+                model_name = 'final_dueling_11-30_23:25.pth'
+            # if self.stage == '4':
+            #     model_name = 'final_dqn_11-24.pth'
+            # NOTE: For now, stage 4 model is in progress. I need to convert pytorch model version
+
+            print('loading trained model in: '+ self.dirPath + model_name)
+            model_params = torch.load(self.dirPath + model_name)
             self.model.load_state_dict(model_params)
 
+        # update the target model
+        self.updateTargetModel()
+        
         # saving model and data
         self.save_model_freq = 20
         
