@@ -28,7 +28,7 @@ from geometry_msgs.msg import Pose
 class Respawn():
     def __init__(self):
         self.modelPath = os.path.dirname(os.path.realpath(__file__))
-        self.modelPath = self.modelPath.replace('turtlebot3_machine_learning/turtlebot3_dqn/src/turtlebot3_dqn',
+        self.modelPath = self.modelPath.replace('RoboNav/turtlebot3_dqn/src/turtlebot3_dqn',
                                                 'turtlebot3_simulations/turtlebot3_gazebo/models/turtlebot3_square/goal_box/model.sdf')
         self.f = open(self.modelPath, 'r')
         self.model = self.f.read()
@@ -86,7 +86,7 @@ class Respawn():
         # get mode parameter
         mode = rospy.get_param('mode')
 
-        if self.stage != 4:
+        if self.stage != 4 and self.stage != 5:
             if mode == 'train':
                 while position_check:
                     goal_x = random.randrange(-12, 13) / 10.0
@@ -128,7 +128,7 @@ class Respawn():
                 self.goal_position.position.x = trial_goals[trial][goal_count][0]
                 self.goal_position.position.y = trial_goals[trial][goal_count][1]
 
-        else:
+        elif self.stage == 4:
             if mode == 'train':
                 while position_check:
                     goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
@@ -152,10 +152,34 @@ class Respawn():
                 goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
                 goal_y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
 
-                self.trial_index = []
+                self.trial_index = [[0, 5, 3, 8, 10],
+                                    [10, 2, 3, 6, 11],
+                                    [6, 2, 8, 6, 9],
+                                    [1, 3, 4, 8, 11],
+                                    [8, 6, 7, 2, 4]]
 
-                self.goal_position.position.x = goal_x_list[self.trial_index]
-                self.goal_position.position.y = goal_y_list[self.trial_index]
+                self.goal_position.position.x = goal_x_list[self.trial_index[trial][goal_count]]
+                self.goal_position.position.y = goal_y_list[self.trial_index[trial][goal_count]]
+
+        elif self.stage == 5:
+            
+            if mode == 'test':
+                trial = rospy.get_param('trial_number')
+                goal_count = rospy.get_param('goal_count')
+
+                # for empty hospital world
+                # goal_x_list = [2.5, 4.4, 1.4, -1.4, -1.4]
+                # goal_y_list = [4.8, 1.3, 1.2, 4.6, -1.2]
+
+                goal_x_list = [-3.9, -6.3, -6.2, -6.5, -1.2, 2.1, 3.1, 6.7, 4.8]
+                goal_y_list = [4.0, 3.8, 0.3, -3.3, 0.5, 0.4, 2.0, 4.2, 1.6]
+
+                self.trial_index = [[0, 1, 2, 3, 1],
+                                    [4, 5, 6, 7, 8]]
+
+                self.goal_position.position.x = goal_x_list[self.trial_index[trial][goal_count]]
+                self.goal_position.position.y = goal_y_list[self.trial_index[trial][goal_count]]
+
 
         time.sleep(0.5)
         self.respawnModel()
