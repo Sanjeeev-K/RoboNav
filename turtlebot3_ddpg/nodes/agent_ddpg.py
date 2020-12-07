@@ -385,7 +385,7 @@ class ReinforceAgent():
             episode_done = False
 
             while not episode_done:
-                action = self.getAction(state,self.test)
+                action = self.getAction(state)
 
                 next_state, reward, done = self.env.step(action)
         

@@ -31,11 +31,11 @@ if __name__ == '__main__':
 	
 	args = rospy.myargv(argv=sys.argv)
 	stage = args[1]
-		
+	print(type(stage))	
 	method = args[2]
 	mode = args[3]
 	
-	if stage == 1:
+	if stage == "1":
 		state_size = 26
 		action_size = 2
 	else:
