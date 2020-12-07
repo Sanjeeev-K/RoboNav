@@ -41,19 +41,19 @@ if __name__ == '__main__':
 	else:
 		state_size = 28
 		action_size = 2
-	test = True
-	cont = False
-	current_time = '2020_11_29-05:59:21'
+
+	# current_time = '2020_11_29-05:59:21'
+	current_time = 'ab'
 	env = Env(action_size)
-	if test:
-		agent = ReinforceAgent(env, state_size, action_size, stage = stage , method = "ddpg", mode = "test", current_time)
+	if mode == "test":
+		agent = ReinforceAgent(env, state_size, action_size, stage , "ddpg", "test", current_time)
 		agent.test_model(30)
 		
-	elif cont:
-		agent = ReinforceAgent(env, state_size, action_size, stage = stage, method = "ddpg", mode = "cont", current_time)
+	elif mode == "cont":
+		agent = ReinforceAgent(env, state_size, action_size, stage, "ddpg", "cont", current_time)
 		agent.train_model()
 	else:
-		agent = ReinforceAgent(env, state_size, action_size, stage = stage, method = "ddpg", mode = "train", current_time)
+		agent = ReinforceAgent(env, state_size, action_size, stage, "ddpg", "train")
 		agent.train_model()
 	
    

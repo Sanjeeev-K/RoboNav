@@ -47,7 +47,7 @@ random.seed(1000)
 current_time_global = datetime.datetime.now().strftime("%Y_%m_%d-%H:%M:%S")
 
 class ReinforceAgent():
-    def __init__(self, env, state_size, action_size, stage, method, mode, current_time):
+    def __init__(self, env, state_size, action_size, stage, method, mode, current_time = current_time_global):
 
         ############## Init Parameters ##############
         self.env = env
@@ -102,10 +102,10 @@ class ReinforceAgent():
 
 
         ############## Random_Noise Parameters ##############
-        self.ou_theta = 0.15
-        self.ou_mu = 0.2
-        self.ou_sigma = 0.5
-        self.random_noise = OrnsteinUhlenbeckProcess(size=self.action_size, theta=self.ou_theta, mu=self.ou_mu, sigma=self.ou_sigma)
+        # self.ou_theta = 0.15
+        # self.ou_mu = 0.2
+        # self.ou_sigma = 0.5
+        # self.random_noise = OrnsteinUhlenbeckProcess(size=self.action_size, theta=self.ou_theta, mu=self.ou_mu, sigma=self.ou_sigma)
 
 
         # print(self.dirPath + self.current_time)
@@ -132,8 +132,8 @@ class ReinforceAgent():
 
         if self.mode == "test":
             print("############## Testing model ##############")
-            actor_weights = torch.load(self.model_path + '1700' + '_actor.pth', map_location = self.device)
-            critic_weights = torch.load(self.model_path + '1700' + '_critic.pth', map_location = self.device)
+            actor_weights = torch.load(self.model_path + '5900' + '_actor.pth', map_location = self.device)
+            critic_weights = torch.load(self.model_path + '5900' + '_critic.pth', map_location = self.device)
             self.actor.load_state_dict(actor_weights)
             self.critic.load_state_dict(critic_weights)
             self.actor.eval()
