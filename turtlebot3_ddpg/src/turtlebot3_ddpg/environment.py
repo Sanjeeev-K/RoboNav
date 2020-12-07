@@ -94,6 +94,7 @@ class Env():
         current_distance = round(math.hypot(self.goal_x - self.position.x, self.goal_y - self.position.y),2)
         if current_distance < 0.2:
             self.get_goalbox = True
+            self.goal_reached = True
 
         if self.stage == 1:
             return scan_range + [heading, current_distance], done
@@ -122,9 +123,9 @@ class Env():
                 ob_reward = -5
             else:
                 ob_reward = 0
-            reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate) + ob_reward
+            reward = ((round(yaw_reward * 5, 2)) * distance_rate) + ob_reward
         else:
-            reward = ((round(yaw_reward[action] * 5, 2)) * distance_rate)
+            reward = ((round(yaw_reward * 5, 2)) * distance_rate)
 
         if done:
             rospy.loginfo("Collision!!")
