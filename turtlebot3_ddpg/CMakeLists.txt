@@ -2,7 +2,7 @@
 # Set minimum required version of cmake, project name and compile options
 ################################################################################
 cmake_minimum_required(VERSION 2.8.3)
-project(turtlebot3_dqn)
+project(turtlebot3_ddpg)
 
 ################################################################################
 # Find catkin packages and libraries for catkin and system dependencies
@@ -37,19 +37,15 @@ catkin_package(
 # Install
 ################################################################################
 catkin_install_python(PROGRAMS
-  nodes/turtlebot3_dqn_stage_1
-  nodes/turtlebot3_dqn_stage_2
-  nodes/turtlebot3_dqn_stage_3
-  nodes/turtlebot3_dqn_stage_4
-  nodes/result_graph
-  nodes/action_graph
-  nodes/moving_obstacle
-  nodes/combination_obstacle_1
-  nodes/combination_obstacle_2
-  src/${PROJECT_NAME}/environment_stage_1.py
-  src/${PROJECT_NAME}/environment_stage_2.py
-  src/${PROJECT_NAME}/environment_stage_3.py
-  src/${PROJECT_NAME}/environment_stage_4.py
+  nodes/turtlebot3_ddpg_torch.py
+  nodes/result_graph.py
+  nodes/action_graph.py
+  nodes/moving_obstacle.py
+  nodes/combination_obstacle_1.py
+  nodes/combination_obstacle_2.py
+  src/${PROJECT_NAME}/data_logger.py
+  src/${PROJECT_NAME}/ddpg_model.py
+  src/${PROJECT_NAME}/environment.py
   src/${PROJECT_NAME}/respawnGoal.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

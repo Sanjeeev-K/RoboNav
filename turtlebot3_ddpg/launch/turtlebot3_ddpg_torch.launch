@@ -1,5 +1,6 @@
+<!-- -->
 <launch>
-  <arg name="stage" default="0"/>
+  <arg name="stage" default="1"/>
   <arg name="method" default="ddpg"/>
   <arg name="mode" default="train"/>
   <arg name="reward" default="1"/>
@@ -9,7 +10,6 @@
 
 
   <param name="stage_number"  value="$(arg stage)"/>
-  <param name="reward"  value="$(arg reward)"/>
 
   <node pkg="turtlebot3_ddpg" type="turtlebot3_ddpg_torch.py" name="turtlebot3_ddpg" output="screen"
         args="$(arg stage) $(arg method) $(arg mode) $(arg reward)"/>

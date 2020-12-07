@@ -31,7 +31,7 @@ from std_msgs.msg import Float32MultiArray
 # from src.turtlebot3_ddpg.environment_stage_4_torch_ddpg import Env
 from src.turtlebot3_ddpg.ddpg_model import Actor,Critic
 from src.turtlebot3_ddpg.data_logger import DataLogger
-from src.turtlebot3_ddpg.randomise_action import OrnsteinUhlenbeckProcess
+# from src.turtlebot3_ddpg.randomise_action import OrnsteinUhlenbeckProcess
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -47,7 +47,7 @@ random.seed(1000)
 current_time_global = datetime.datetime.now().strftime("%Y_%m_%d-%H:%M:%S")
 
 class ReinforceAgent():
-    def __init__(self, env, state_size, action_size, stage, method, mode, current_time = current_time_global):
+    def __init__(self, env, state_size, action_size, stage, method, mode, current_time):
 
         ############## Init Parameters ##############
         self.env = env
@@ -57,8 +57,7 @@ class ReinforceAgent():
         self.current_time = current_time
         self.state_size = state_size
         self.action_size = action_size
-        self.test = test
-        self.cont = cont
+
 
         ############## Publisher ##############
         self.pub_result = rospy.Publisher('result', Float32MultiArray, queue_size=5)
@@ -131,7 +130,7 @@ class ReinforceAgent():
 
         ############## Testing ##############
 
-        if self.mode = "test":
+        if self.mode == "test":
             print("############## Testing model ##############")
             actor_weights = torch.load(self.model_path + '1700' + '_actor.pth', map_location = self.device)
             critic_weights = torch.load(self.model_path + '1700' + '_critic.pth', map_location = self.device)
@@ -141,7 +140,7 @@ class ReinforceAgent():
             self.critic.eval()
 
         ############## Conitnuing ##############
-        if self.mode = "cont":
+        if self.mode == "cont":
             print("############## Resuming Tarining ##############")
             last_train_memory = torch.load(self.model_path+ 'last_train_memory.tar')
             self.epsilon = last_train_memory['epsilon']

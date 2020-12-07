@@ -27,30 +27,33 @@ from agent_ddpg import *
 
 
 if __name__ == '__main__':
-
+	
+	
 	args = rospy.myargv(argv=sys.argv)
 	stage = args[1]
+		
 	method = args[2]
 	mode = args[3]
-
+	
 	if stage == 1:
 		state_size = 26
 		action_size = 2
 	else:
 		state_size = 28
 		action_size = 2
-	test = False
+	test = True
 	cont = False
 	current_time = '2020_11_29-05:59:21'
 	env = Env(action_size)
 	if test:
 		agent = ReinforceAgent(env, state_size, action_size, stage = stage , method = "ddpg", mode = "test", current_time)
 		agent.test_model(30)
+		
 	elif cont:
 		agent = ReinforceAgent(env, state_size, action_size, stage = stage, method = "ddpg", mode = "cont", current_time)
 		agent.train_model()
 	else:
-		agent = ReinforceAgent(env, state_size, action_size, stage = stage, method = "ddpg", mode = "train")
+		agent = ReinforceAgent(env, state_size, action_size, stage = stage, method = "ddpg", mode = "train", current_time)
 		agent.train_model()
-
+	
    
