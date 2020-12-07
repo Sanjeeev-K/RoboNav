@@ -33,6 +33,10 @@ class DataLogger():
             self.object_id = ['turtlebot3_burger',
                               'obstacle_1',
                               'obstacle_2']
+        if self.stage == '5':
+            # self.object_id = ['turtlebot3_burger']
+            self.object_id = ['turtlebot3']
+            
         # variables
         self.x = [[],[],[]]
         self.y = [[],[],[]]
@@ -77,6 +81,15 @@ class DataLogger():
 
         self.min_dist.append(round(min(scan_range), 2))
 
+    def clear_data(self):
+        self.x = [[],[],[]]
+        self.y = [[],[],[]]
+        self.theta = [[],[],[]]
+        self.v = [[],[],[]]  
+        self.omega = [[],[],[]] 
+        self.min_dist = []
+
+
     def save_data(self, trial, done='success'):
         # save state data
         for i in range(len(self.object_id)):
@@ -93,3 +106,6 @@ class DataLogger():
             else:
                 os.makedirs(self.directory)
                 np.save(self.directory+filename+".npy", data)
+
+        # clear data
+        self.clear_data()
