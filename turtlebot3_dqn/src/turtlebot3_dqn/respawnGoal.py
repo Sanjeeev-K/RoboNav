@@ -152,11 +152,16 @@ class Respawn():
                 goal_x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
                 goal_y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
 
-                self.trial_index = [[0, 5, 3, 8, 10],
-                                    [10, 2, 3, 6, 11],
-                                    [6, 2, 8, 6, 9],
-                                    [1, 3, 4, 8, 11],
-                                    [8, 6, 7, 2, 4]]
+                self.trial_index = [[ 3,  1, 10,  8,  6],
+                                    [ 7, 10,  6,  0, 10],
+                                    [ 1,  2,  4,  6,  4],
+                                    [ 0,  5,  6, 11,  4],
+                                    [ 0,  7,  6, 11,  6],
+                                    [11,  8,  4,  6, 10],
+                                    [ 9,  9,  0,  7,  7],
+                                    [ 2,  0,  9,  5,  7],
+                                    [ 2,  3,  1,  9,  6],
+                                    [ 5,  3,  2, 10,  0]]
 
                 self.goal_position.position.x = goal_x_list[self.trial_index[trial][goal_count]]
                 self.goal_position.position.y = goal_y_list[self.trial_index[trial][goal_count]]
@@ -167,15 +172,17 @@ class Respawn():
                 trial = rospy.get_param('trial_number')
                 goal_count = rospy.get_param('goal_count')
 
-                # for empty hospital world
-                # goal_x_list = [2.5, 4.4, 1.4, -1.4, -1.4]
-                # goal_y_list = [4.8, 1.3, 1.2, 4.6, -1.2]
+                # for turtlebot3_house world
+                # goal_x_list = [-3.9, -6.3, -6.2, -6.5, -1.2, 2.1, 3.1, 6.7, 4.8]
+                # goal_y_list = [4.0, 3.8, 0.3, -3.3, 0.5, 0.4, 2.0, 4.2, 1.6]
 
-                goal_x_list = [-3.9, -6.3, -6.2, -6.5, -1.2, 2.1, 3.1, 6.7, 4.8]
-                goal_y_list = [4.0, 3.8, 0.3, -3.3, 0.5, 0.4, 2.0, 4.2, 1.6]
+                goal_x_list = [-6.2, -6.3, -5.1, -3.9, -0.8, 3.2, 6.3, 5.5]
+                goal_y_list = [-2.6, 0.2, 3.2, 0.9, 0.3, 0.7, 0.3, -3.8]
 
-                self.trial_index = [[0, 1, 2, 3, 1],
-                                    [4, 5, 6, 7, 8]]
+                self.trial_index = [[0, 1, 2, 3, 4, 5, 6, 7],
+                                    [0, 1, 2, 3, 4, 5, 6, 7],
+                                    [0, 1, 2, 3, 4, 5, 6, 7]]
+                
 
                 self.goal_position.position.x = goal_x_list[self.trial_index[trial][goal_count]]
                 self.goal_position.position.y = goal_y_list[self.trial_index[trial][goal_count]]

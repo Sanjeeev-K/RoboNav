@@ -97,10 +97,14 @@ class ReinforceAgent():
             if self.stage == '2':
                 model_name = 'final_dqn_11-24.pth'
             if self.stage == '3':
-                model_name = 'final_dueling_11-30_23:25.pth'
-            # if self.stage == '4':
-            #     model_name = 'final_dqn_11-24.pth'
-            # NOTE: For now, stage 4 model is in progress. I need to convert pytorch model version
+                # model_name = 'final_dueling_11-30_23:25.pth'
+                model_name = 'final_dqn_12-06_21:46.pth'
+            if self.stage == '4':
+                model_name = 'final_dqn_12-02_21:42.pth'
+            elif self.stage == '5':
+                model_name = 'final_dqn_12-02_21:42.pth'
+                self.dirPath = self.dirPath.replace('save_model/stage_5_', 
+                                    'save_model/stage_4_')
 
             print('loading trained model in: '+ self.dirPath + model_name)
             model_params = torch.load(self.dirPath + model_name)

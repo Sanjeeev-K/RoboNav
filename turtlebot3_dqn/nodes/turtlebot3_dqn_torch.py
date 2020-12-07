@@ -223,10 +223,16 @@ def test(args):
     # set start time
     start_time = time.time()
 
-    EPISODES = 30
+    TRIALS = 30
+
+    # set the trial length
+    if stage == '5':
+        TRIAL_LENGTH = 8
+    else:
+        TRIAL_LENGTH = 5
 
     # main loop: for each episode
-    for e in range(agent.load_episode + 1, EPISODES):        
+    for e in range(agent.load_episode + 1, TRIALS):        
         # set the trial and goal_count as a ros_parameter
         rospy.set_param('trial_number', e-1)
         goal_count = 0
@@ -239,7 +245,6 @@ def test(args):
         # inner loop: for each episode step
         # for t in range(agent.episode_step):
         episode_done = False
-        goal_count = 0
         while not episode_done:
             # get action
             action = agent.getAction(state)
@@ -267,7 +272,7 @@ def test(args):
                 rospy.set_param('goal_count', goal_count)
                 rospy.loginfo('Trial: %d | Goal [%d] completed', e, goal_count)
                 env.goal_reached = False
-                if goal_count == 5:
+                if goal_count == TRIAL_LENGTH:
                     episode_done = True
                     logger.save_data(e)
 
@@ -282,7 +287,7 @@ def test(args):
                 m, s = divmod(int(time.time() - start_time), 60)
                 h, m = divmod(m, 60)
 
-                rospy.loginfo('Ep: %d | score: %.2f', e, score)
+                rospy.loginfo('Failed Trial  |  Starting Trial %d ', e)
                 param_keys = ['epsilon']
                 param_values = [agent.epsilon]
                 param_dictionary = dict(zip(param_keys, param_values))
