@@ -66,7 +66,7 @@ log_directory = os.path.dirname(os.path.abspath(__file__))+'/logs/'
 
 for i in range(1,5): # iterating through stage folders
 
-    with open(log_directory+"stage_"+str(i)+'_summary.csv', mode='a') as output:
+    with open(log_directory+"stage_"+str(i)+'_summary.csv', mode='w') as output:
         dw = csv.DictWriter(output, delimiter='\t', fieldnames=['Success','Path Length (in meters)', 'Average Clearance (in meters)', 'Computation_time', 'Smoothness Factor'])
         dw.writeheader()
 
