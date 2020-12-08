@@ -75,6 +75,7 @@ for i in range(1,5): # iterating through stage folders
         path_length_list = []
         clearance_list = []
         time_list = []
+        smoothness_list = []
 
         for trial_no in range(1,11): #iterating through trail numbers
             a = np.load(log_directory+"stage"+str(i) + "/turtlebot3_burger" + "_stage_" + str(i) + "_dqn_" + str(trial_no) + ".npy", allow_pickle=True)
@@ -100,6 +101,7 @@ for i in range(1,5): # iterating through stage folders
                 path_length_list.append(path_length)
                 clearance_list.append(avg_clearance)
                 time_list.append(computation_time)
+                smoothness_list.append(smoothness)
             
             csv_writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([ status, path_length,avg_clearance,computation_time, smoothness])
@@ -112,5 +114,7 @@ for i in range(1,5): # iterating through stage folders
         csv_writer.writerow([ 'Mean Path Length (meters)' ,statistics.mean(path_length_list), 'Standard Deviation in Path Length' ,statistics.stdev(path_length_list)])
         csv_writer.writerow([ 'Mean Clearance (meters)' ,statistics.mean(clearance_list), 'Standard Deviation in Clearance' ,statistics.stdev(clearance_list)])
         csv_writer.writerow([ 'Mean Computation Time' ,statistics.mean(time_list), 'Standard Deviation in Computation Time' ,statistics.stdev(time_list)])
+        csv_writer.writerow([ 'Mean Smoothness' ,statistics.mean(smoothness_list), 'Standard Deviation in smoothness' ,statistics.stdev(smoothness_list)])
+        
         # statistics.stdev(slope_list)
         csv_writer.writerow([ '**********', '**********','**********','**********', '**********'])
