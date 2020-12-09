@@ -268,7 +268,7 @@ def test(args):
 
             # check if goal is reached
             if env.goal_reached:
-                goal_count += 1
+                #goal_count += 1
                 rospy.set_param('goal_count', goal_count)
                 rospy.loginfo('Trial: %d | Goal [%d] completed', e, goal_count)
                 env.goal_reached = False
