@@ -147,8 +147,15 @@ class Env():
             else:
                 reward = 200
             self.pub_cmd_vel.publish(Twist())
-            self.goal_x, self.goal_y = self.respawn_goal.getPosition(True, delete=True)
-            self.goal_distance = self.getGoalDistace()
+            goal_count = rospy.get_param('goal_count')
+            if goal_count==4:
+                goal_count += 1
+                rospy.set_param('goal_count', goal_count)
+            if goal_count < 4:
+                goal_count += 1
+                rospy.set_param('goal_count', goal_count)
+                self.goal_x, self.goal_y = self.respawn_goal.getPosition(True, delete=True)
+                self.goal_distance = self.getGoalDistace()
             self.get_goalbox = False
 
         return reward
