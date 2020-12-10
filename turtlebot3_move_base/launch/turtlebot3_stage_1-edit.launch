@@ -10,7 +10,7 @@
   <arg name="pitch" default="0"/>
   <arg name="yaw" default="0"/>
   <arg name="move_forward_only" default="false"/>
-  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/turtlebot3_stage_1.yaml"/>
+  <arg name="map_file" default="$(find turtlebot3_move_base)/maps/turtlebot3_stage_1.yaml"/>
   <arg name="open_rviz" default="true"/>
 
   <!-- Launch other relevant files-->

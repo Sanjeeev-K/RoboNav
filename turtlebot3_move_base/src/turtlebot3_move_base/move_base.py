@@ -31,20 +31,77 @@ class Move():
 
         #self.goal_list = np.array([[0.6, 0.0], [0.9, 1.2]])
 
-
-        self.goal_list = np.array([[[0.6, 0.0], [0.9, 1.2], [-0.9, 0.0], [-0.1, -0.1], [0.5, 0.1]],
-                                   [[0.9, 1.2], [-1.1, 0.9], [0.9, 1.2], [1.1, 0.3], [0.1, 1.0]],
-                                   [[-0.6, -1.2], [1.2, 0.5], [1.2, -0.6], [-0.1, -1.2], [1.2, 1.2]],
-                                   [[-0.5, -0.1], [-1.2, -1.1], [-0.1, -0.8], [0.8, 1.1], [-0.3, 1.2]],
-                                   [[1.2, 1.0], [-0.6, 0.0], [1.2, -1.0], [-0.2, -1.2], [0.1, 0.7]],
-                                   [[-1.1, -0.7], [-0.9, 1.1], [-0.8, 1.2], [-1.2, -0.3], [1.1, -0.1]],
-                                   [[1.2, 0.7], [-1.2, -0.5], [1.2, -0.8], [-1.2, 0.8], [1.1, 0.7]],
-                                   [[-1.1, 0.9], [0.0, -1.0], [-1.2, 0.1], [-0.5, -1.2], [0.6, 1.1]],
-                                   [[-1.1, 0.5], [1.1, 1.0], [1.0, 0.0], [-0.9, 1.2], [0.0, -0.7]],
-                                   [[-0.1, 1.1], [1.1, 0.3], [-0.8, 1.2], [-1.2, -0.3], [0.0, 0.9]]])
+        self.stage = rospy.get_param("stage")
+        self.method = str("move_base")
+        rospy.set_param("method" , self.method)
 
 
+        if self.stage == "4":
+            print(4)
+            
+            x_list = [0.6, 1.2, -1.2, -0.1, 0.5, -0.1 , 1.2, -0.5,  0.0, -0.2, -1.2, 0.1, 0.9]
+            y_list = [0,   0.5,  0.3,  1.1, 0.1, -1.2 , 1.2, -0.1, -1.0, -0.3, -1,  -1.6, 1.2]
+            
+            # x_list = [0.6, 1.9, 0.5, 0.2, -0.8, -1, -1.9, 0.5, 2, 0.5, 0, -0.1, -2]
+            # y_list = [0, -0.5, -1.9, 1.5, -0.9, 1, 1.1, -1.5, 1.5, 1.8, -1, 1.6, -0.8]
 
+
+            print('Stage 4')
+            self.trial_index = [[ 3,  1, 10,  8,  6],
+                                [ 7, 10,  6,  0, 10],
+                                [ 1,  2,  4,  6,  4],
+                                [ 0,  5,  6, 11,  4],
+                                [ 0,  7,  6, 11,  6],
+                                [11,  8,  4,  6, 10],
+                                [ 9,  9,  0,  7,  7],
+                                [ 2,  0,  9,  5,  7],
+                                [ 2,  3,  1,  9,  6],
+                                [ 5,  3,  2, 10,  0]]
+
+            row = len(self.trial_index)
+            col = len(self.trial_index[0])
+            print("row = " ,row)
+            print("col = " ,col) 
+            self.goal_list = []
+            trial_goals = []
+
+            for i in range(row):
+                for j in range(col):
+                    trial_goals.append( [ x_list [self.trial_index[i][j] ], y_list [self.trial_index[i][j] ] ] )
+                    
+                self.goal_list.append(trial_goals)
+                trial_goals=[]
+
+            self.goal_list = np.array(self.goal_list)
+            # self.goal_position.position.x = goal_x_list[self.trial_index[trial][goal_count]]
+            # self.goal_position.position.y = goal_y_list[self.trial_index[trial][goal_count]]
+
+        else:
+            self.goal_list = np.array([[[0.6, 0.0], [0.9, 1.2], [-0.9, 0.0], [-0.1, -0.1], [0.5, 0.1]],
+                                    [[0.9, 1.2], [-1.1, 0.9], [0.9, 1.2], [1.1, 0.3], [0.1, 1.0]],
+                                    [[-0.6, -1.2], [1.2, 0.5], [1.2, -0.6], [-0.1, -1.2], [1.2, 1.2]],
+                                    [[-0.5, -0.1], [-1.2, -1.1], [-0.1, -0.8], [0.8, 1.1], [-0.3, 1.2]],
+                                    [[1.2, 1.0], [-0.6, 0.0], [1.2, -1.0], [-0.2, -1.2], [0.1, 0.7]],
+                                    [[-1.1, -0.7], [-0.9, 1.1], [-0.8, 1.2], [-1.2, -0.3], [1.1, -0.1]],
+                                    [[1.2, 0.7], [-1.2, -0.5], [1.2, -0.8], [-1.2, 0.8], [1.1, 0.7]],
+                                    [[-1.1, 0.9], [0.0, -1.0], [-1.2, 0.1], [-0.5, -1.2], [0.6, 1.1]],
+                                    [[-1.1, 0.5], [1.1, 1.0], [1.0, 0.0], [-0.9, 1.2], [0.0, -0.7]],
+                                    [[-0.1, 1.1], [1.1, 0.3], [-0.8, 1.2], [-1.2, -0.3], [0.0, 0.9]]])
+
+
+
+        # self.goal_list = np.array([[[0.6, 0.0], [0.9, 1.2], [-0.9, 0.0], [-0.1, -0.1]],
+        #                             [[0.9, 1.2], [-1.1, 0.9], [0.9, 1.2], [1.1, 0.3]],
+        #                             [[-0.6, -1.2], [1.2, 0.5], [1.2, -0.6], [-0.1, -1.2]],
+        #                             [[-0.5, -0.1], [-1.2, -1.1], [-0.1, -0.8], [0.8, 1.1]],
+        #                             [[1.2, 1.0], [-0.6, 0.0], [1.2, -1.0], [-0.2, -1.2]],
+        #                             [[-1.1, -0.7], [-0.9, 1.1], [-0.8, 1.2], [-1.2, -0.3]],
+        #                             [[1.2, 0.7], [-1.2, -0.5], [1.2, -0.8], [-1.2, 0.8]],
+        #                             [[-1.1, 0.9], [0.0, -1.0], [-1.2, 0.1], [-0.5, -1.2]],
+        #                             [[-1.1, 0.5], [1.1, 1.0], [1.0, 0.0], [-0.9, 1.2]],
+        #                             [[-0.1, 1.1], [1.1, 0.3], [-0.8, 1.2], [-1.2, -0.3]]])
+
+        print(self.goal_list)
 
         self.goal_list_RowIndex = 0                   # 0-10
 
@@ -75,9 +132,7 @@ class Move():
         self.currentX = 0
         self.currentY = 0
 
-        self.stage = rospy.get_param("stage")
-        self.method = str("move_base")
-        rospy.set_param("method" , self.method)
+        
         
         rospy.set_param("store_flag", False) 
         rospy.set_param("save_flag", False) 
@@ -155,34 +210,22 @@ class Move():
             else:
                 rospy.loginfo(' ######### End of Trial ######### ')
                 rospy.set_param("save_flag", True)
-                self.trial_completed += 1
-                self.goal_list_RowIndex += 1
-                self.finished = True
-                self.goalIndex = 0
+                self.trial_restart()
                 
                 
 
-                if self.last:
-                    print('All Trials Completed')
-                    rospy.set_param("all_finished_flag", True)
-                    self.shutdown()
-                else :  
-                    self.goal_x_list = self.goal_list[self.goal_list_RowIndex , : , 0]
-                    self.goal_y_list = self.goal_list[self.goal_list_RowIndex , : , 1]
-
-                    if self.trial_completed == self.noOfTrials-1:
-                        self.last = True
-
-                    # reset env
-                    self.env.reset()
-
-                    self.run()
+                
                     
                 
 
         elif status == 4:
-            rospy.loginfo("Goal pose "+str(self.count)+" was aborted by the Action Server")
-            self.shutdown()
+            rospy.loginfo("Status 4: Goal pose "+str(self.count)+" was aborted by the Action Server")
+
+            rospy.set_param("save_flag", True)
+            rospy.set_param("trial",self.trial_completed+1)
+
+            self.trial_restart()
+            
 
         elif status == 5 : 
             rospy.loginfo("Status 5")
@@ -197,6 +240,33 @@ class Move():
             rospy.loginfo("Status 8")
         else: 
             rospy.logerr("Something else happened ")
+
+
+    def trial_restart(self):
+        self.trial_completed += 1
+        self.goal_list_RowIndex += 1
+        self.finished = True
+        self.goalIndex = 0
+
+        if self.last:
+            print('All Trials Completed')
+            rospy.set_param("all_finished_flag", True)
+            self.shutdown()
+        else :  
+            self.populateGoalLists()
+
+            if self.trial_completed == self.noOfTrials-1:
+                self.last = True
+
+            # reset env
+            self.env.reset()
+
+            self.run()
+
+    def populateGoalLists(self):
+        self.goal_x_list = self.goal_list[self.goal_list_RowIndex , : , 0]
+        self.goal_y_list = self.goal_list[self.goal_list_RowIndex , : , 1]
+
 
     def active_cb(self):
         # print("Active callback")

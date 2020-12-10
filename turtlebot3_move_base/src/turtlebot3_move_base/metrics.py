@@ -64,7 +64,7 @@ def calculate_smoothing(x_list, y_list):
 log_directory = os.path.dirname(os.path.abspath(__file__))+'/logs/'
 
 
-for i in range(1,2): # iterating through stage folders
+for i in range(3,4): # iterating through stage folders
 
     with open(log_directory+"stage_"+str(i)+'_summary.csv', mode='w') as output:
         dw = csv.DictWriter(output, delimiter='\t', fieldnames=['Success','Path Length (in meters)', 'Average Clearance (in meters)', 'Computation_time', 'Smoothness Factor'])
@@ -77,7 +77,10 @@ for i in range(1,2): # iterating through stage folders
         time_list = []
 
         for trial_no in range(1,11): #iterating through trail numbers
+
+            # if trial_no != 6 : 
             # a = np.load(log_directory+"stage"+str(i) + "/turtlebot3_burger" + "_stage_" + str(i) + "_dqn_" + str(trial_no) + ".npy", allow_pickle=True)
+            
             a = np.load(log_directory+"/stage" + str(i) +  "/turtlebot3_burger" + "_stage_" + str(i) + "_move_base_" + str(trial_no) + ".npy", allow_pickle=True)
             print("i : ", i, " : trial_no : ",trial_no)
             # print(a)
@@ -99,7 +102,14 @@ for i in range(1,2): # iterating through stage folders
             # with open('output.csv', mode='a') as output:
 
             total_count += 1
-            if status == 'success': #change to "success"
+
+            # else:
+            #     status = False
+            #     x_data = None
+            #     y_data = None
+            #     clearance_data = None
+
+            if status == True: #change to "success"
                 success_count += 1
                 path_length_list.append(path_length)
                 clearance_list.append(avg_clearance)
@@ -113,8 +123,8 @@ for i in range(1,2): # iterating through stage folders
         csv_writer.writerow([ 'Successful Trials', success_count,])
         csv_writer.writerow([ 'Total Trials',total_count,])
         csv_writer.writerow([ 'Percentage Success' ,100*float(success_count)/float(total_count)])
-        # csv_writer.writerow([ 'Mean Path Length (meters)' ,statistics.mean(path_length_list), 'Standard Deviation in Path Length' ,statistics.stdev(path_length_list)])
-        # csv_writer.writerow([ 'Mean Clearance (meters)' ,statistics.mean(clearance_list), 'Standard Deviation in Clearance' ,statistics.stdev(clearance_list)])
-        # csv_writer.writerow([ 'Mean Computation Time' ,statistics.mean(time_list), 'Standard Deviation in Computation Time' ,statistics.stdev(time_list)])
+        csv_writer.writerow([ 'Mean Path Length (meters)' ,statistics.mean(path_length_list), 'Standard Deviation in Path Length' ,statistics.stdev(path_length_list)])
+        csv_writer.writerow([ 'Mean Clearance (meters)' ,statistics.mean(clearance_list), 'Standard Deviation in Clearance' ,statistics.stdev(clearance_list)])
+        csv_writer.writerow([ 'Mean Computation Time' ,statistics.mean(time_list), 'Standard Deviation in Computation Time' ,statistics.stdev(time_list)])
         # statistics.stdev(slope_list)
         csv_writer.writerow([ '**********', '**********','**********','**********', '**********'])

@@ -1,0 +1,7 @@
+image: turtlebot3_stage_4.pgm
+resolution: 0.050000
+origin: [-13.790000, -14.600000, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

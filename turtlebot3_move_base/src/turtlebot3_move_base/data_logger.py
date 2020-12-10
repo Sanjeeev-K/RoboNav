@@ -136,7 +136,7 @@ class DataLogger():
                 print("Storing data")
                 self.store_data()
 
-                if (self.current_min_scan < 0.4):
+                if (self.current_min_scan < 0.13):
                     collision_in_episode.append(True)
                     rospy.set_param("collision", True)
                 else:

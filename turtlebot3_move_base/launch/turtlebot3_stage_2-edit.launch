@@ -10,7 +10,7 @@
   <arg name="pitch" default="0"/>
   <arg name="yaw" default="0"/>
   <arg name="move_forward_only" default="false"/>
-  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/turtlebot3_stage_2.yaml"/>
+  <arg name="map_file" default="$(find turtlebot3_move_base)/maps/turtlebot3_stage_2.yaml"/>
   <arg name="open_rviz" default="true"/>
   <!-- Launch other relevant files-->
   <!--include file="$(find my_robot)/launch/robot_description.launch"/-->
@@ -22,7 +22,8 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
     <arg name="debug" value="false"/>
-    <arg name="gui" value="true" />
+    <arg name="gui" value="false" />
+    <arg name="headless" value="true" />
     <arg name="world_name" value="$(arg world_file)"/>
   </include>
 
