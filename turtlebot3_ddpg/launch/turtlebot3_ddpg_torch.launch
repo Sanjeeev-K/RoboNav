@@ -1,0 +1,31 @@
+<!-- -->
+<launch>
+  <arg name="stage" default="1"/>
+  <arg name="method" default="ddpg"/>
+  <arg name="mode" default="train"/>
+  <arg name="reward" default="1"/>
+  <arg name="model" default="burger"/>
+  <arg name="move_3" default="false"/>
+  <arg name="move_4" default="false"/>
+  <arg name="move_5" default="false"/>
+
+
+  <param name="stage_number"  value="$(arg stage)"/>
+
+  <node pkg="turtlebot3_ddpg" type="turtlebot3_ddpg_torch.py" name="turtlebot3_ddpg" output="screen"
+        args="$(arg stage) $(arg method) $(arg mode) $(arg reward)"/>
+
+  <group if="$(arg move_3)">
+    <node pkg="turtlebot3_ddpg"  type="moving_obstacle" name="moving_obstacle" output="screen" />
+  </group>
+
+  <group if="$(arg move_4)">
+    <node pkg="turtlebot3_ddpg" type="combination_obstacle_1.py" name="combination_obstacle_1" output="screen" />
+    <node pkg="turtlebot3_ddpg" type="combination_obstacle_2.py" name="combination_obstacle_2" output="screen" />
+  </group>
+
+  <group if="$(arg move_5)">
+    <node pkg="turtlebot3_ddpg"  type="move_obstacle_house.py" name="moving_obstacle" output="screen" />
+  </group>
+
+</launch>
